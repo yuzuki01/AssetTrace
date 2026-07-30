@@ -1,0 +1,6 @@
+symbol operation target
+b_NKY
+gb_qqq
+gb_tqqq
+sz159866 B 1.500
+sh000688
