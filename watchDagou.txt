@@ -1,6 +1,7 @@
 symbol operation target
 b_NKY
 gb_qqq
-gb_tqqq
-sz159866 B 1.500
+sz159866
 sh000688
+sz002404
+sh515450
