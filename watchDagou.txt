@@ -1,7 +1,0 @@
-symbol operation target
-b_NKY
-gb_qqq
-sz159866
-sh000688
-sz002404
-sh515450

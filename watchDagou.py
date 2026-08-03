@@ -28,7 +28,9 @@ TRADE_SESSIONS = [
 ALERT_DURATION = 30
 REFRESH_INTERVAL = 0.1
 
-CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "watchDagou.txt")
+CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".config", "watchDagou")
+CONFIG_HEADER = "symbol operation target"
+CONFIG_DEFAULT = "sh000001"
 
 RED = "\033[31m"
 GREEN = "\033[32m"
@@ -319,10 +321,17 @@ def format_line_simple(
 # 配置管理
 # ============================================================
 
+def ensure_config() -> None:
+    if os.path.isfile(CONFIG_FILE) and os.path.getsize(CONFIG_FILE) > 0:
+        return
+    os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        f.write(CONFIG_HEADER + "\n")
+        f.write(CONFIG_DEFAULT + "\n")
+
+
 def load_config() -> tuple:
-    if not os.path.isfile(CONFIG_FILE):
-        print(f"配置文件不存在: {CONFIG_FILE}")
-        sys.exit(1)
+    ensure_config()
 
     symbols = []
     targets = {}
@@ -520,6 +529,16 @@ class StockWatcher:
 
     # ---- 输入处理 ----
 
+    def _open_editor(self) -> None:
+        try:
+            subprocess.run(
+                ["gnome-text-editor", CONFIG_FILE],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            pass
+
     def _handle_input(self, ch: str) -> bool:
         if ch == "q":
             self._shutdown.set()
@@ -529,6 +548,8 @@ class StockWatcher:
         if ch == "s":
             with self._lock:
                 self._simple = not self._simple
+        elif ch == "e":
+            threading.Thread(target=self._open_editor, daemon=True).start()
         elif ch == "\x1b\x4f\x50":  # F1
             ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             sys.stdout.write(f"\033[K实时时间: {ts}\n")
